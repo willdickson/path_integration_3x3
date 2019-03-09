@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="path_integration_3x3" name="region_visualizer" type="region_visualizer.py">
+    </node>
+</launch>
