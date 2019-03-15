@@ -1,8 +1,7 @@
 
 class RectRegion(object):
 
-    def __init__(self, index, params):
-        self.index = index
+    def __init__(self, params):
         self.params = dict(params)
 
     def contains(self, obj):

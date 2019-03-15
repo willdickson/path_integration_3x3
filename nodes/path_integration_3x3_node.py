@@ -18,6 +18,11 @@ from cv_bridge import CvBridge, CvBridgeError
 
 from multi_tracker.msg import Trackedobject, Trackedobjectlist
 
+from path_integration_3x3.msg import LedRegionData
+from path_integration_3x3.msg import TrackingRegionData
+from path_integration_3x3.msg import PathIntegration3x3Data
+
+
 class PathIntegrationNode(object):
 
     def __init__(self,nodenum=1):
@@ -50,6 +55,7 @@ class PathIntegrationNode(object):
         self.latest_image = None
         self.image_lock = threading.Lock()
         self.image_sub = rospy.Subscriber('/camera/image_mono', Image, self.image_callback)
+        self.data_pub = rospy.Publisher('path_integration_3x3_data', PathIntegration3x3Data, queue_size=10) 
 
     def get_default_param(self):
         default_param = None
@@ -97,12 +103,39 @@ class PathIntegrationNode(object):
                     self.region_visualizer.update(self.latest_image, tracked_objects)
 
     def process_regions(self,tracked_objects):
-        pass
-        current_time = rospy.Time.now().to_time()
+
+        ros_time_now = rospy.Time.now()
+        current_time = ros_time_now.to_time()
         elapsed_time = current_time - self.start_time 
+
+        header = std_msgs.msg.Header()
+        header.stamp = ros_time_now
+
+        msg = PathIntegration3x3Data()
+        msg.header = header
+
+        # Create message data in region class instances???
+        region_data_list = []
+
         for tracking_region in self.tracking_region_list: 
-            tracking_region.update(elapsed_time, tracked_objects)
-        #print()
+            region_data = tracking_region.update(elapsed_time, tracked_objects)
+            region_data_list.append(region_data)
+
+        for region_data in region_data_list:
+            region_msg = TrackingRegionData()
+            try:
+                region_msg.object = region_data['object'] 
+                region_msg.index = region_data['index']
+            except KeyError:
+                continue
+            for led_data in region_data['leds']:
+                led_msg = LedRegionData()
+                led_msg.contains_object = led_data['contains_object']
+                led_msg.activation_count = led_data['activation_count']
+                led_msg.index = led_data['index']
+                region_msg.led_region_data.append(led_msg)
+            msg.tracking_region_data.append(region_msg)
+        self.data_pub.publish(msg)
                 
 
 # Utility functions
@@ -128,7 +161,7 @@ def convert_led_data(led_data):
     y0 = y - h/2
     x1 = x + w/2
     y1 = y + h/2
-    return {'x0':x0, 'y0':y0, 'x1':x1, 'y1':y1}
+    return {'x0':x0, 'y0':y0, 'x1':x1, 'y1':y1, 'chan': led_data['chan']}
 
 
 
