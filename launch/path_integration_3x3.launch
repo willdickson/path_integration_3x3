@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="path_integration_3x3" name="path_integration_3x3" type="path_integration_3x3_node.py">
+    </node>
+</launch>

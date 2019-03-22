@@ -38,12 +38,12 @@ class LedScheduler(object):
         if self.led_on:
             if (t - self.last_on_t) > self.params['on_duration']:
                 self.turn_off_led()
-                print('region {} led {} off'.format(self.region_index, self.led_index))
+                #print('region {} led {} off'.format(self.region_index, self.led_index))
         else:
             if inside_region:
                 if (t - self.last_on_t) > (self.params['on_duration'] + self.params['refractory_duration']):
                     self.turn_on_led(t)   
-                    print('region {} led {} on'.format(self.region_index, self.led_index))
+                    #print('region {} led {} on'.format(self.region_index, self.led_index))
 
 
 

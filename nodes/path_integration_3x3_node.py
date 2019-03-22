@@ -18,8 +18,8 @@ from cv_bridge import CvBridge, CvBridgeError
 
 from multi_tracker.msg import Trackedobject, Trackedobjectlist
 
-from path_integration_3x3.msg import LedRegionData
-from path_integration_3x3.msg import TrackingRegionData
+#from path_integration_3x3.msg import LedRegionData
+#from path_integration_3x3.msg import TrackingRegionData
 from path_integration_3x3.msg import PathIntegration3x3Data
 
 
@@ -114,27 +114,10 @@ class PathIntegrationNode(object):
         msg = PathIntegration3x3Data()
         msg.header = header
 
-        # Create message data in region class instances???
-        region_data_list = []
-
         for tracking_region in self.tracking_region_list: 
             region_data = tracking_region.update(elapsed_time, tracked_objects)
-            region_data_list.append(region_data)
+            msg.tracking_region_data.append(region_data)
 
-        for region_data in region_data_list:
-            region_msg = TrackingRegionData()
-            try:
-                region_msg.object = region_data['object'] 
-                region_msg.index = region_data['index']
-            except KeyError:
-                continue
-            for led_data in region_data['leds']:
-                led_msg = LedRegionData()
-                led_msg.contains_object = led_data['contains_object']
-                led_msg.activation_count = led_data['activation_count']
-                led_msg.index = led_data['index']
-                region_msg.led_region_data.append(led_msg)
-            msg.tracking_region_data.append(region_msg)
         self.data_pub.publish(msg)
                 
 
