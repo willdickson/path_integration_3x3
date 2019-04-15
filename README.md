@@ -1,4 +1,4 @@
-## path_integration_3x3 
+## path_integration_multi 
 
 ROS package for path integration multi-region tracking + food stimulus arena.
 
